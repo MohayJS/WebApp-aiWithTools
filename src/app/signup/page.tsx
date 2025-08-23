@@ -1,10 +1,10 @@
 "use client"
 
-import { ArrowRight, Merge } from "lucide-react"
+import { useState } from "react"
+import { ArrowRight, Merge, Loader2 } from "lucide-react"
 
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { TextureButton } from "@/components/ui/texture-button"
 import { NeumorphButton } from "@/components/ui/neumorph-button"
 import {
     TextureCardContent,
@@ -15,7 +15,71 @@ import {
     TextureSeparator,
 } from "@/components/ui/texture-card"
 
-export default function SignIn() {
+interface FormData {
+    firstName: string
+    lastName: string
+    idNumber: string
+    email: string
+    password: string
+}
+
+export default function SignUp() {
+    const [formData, setFormData] = useState<FormData>({
+        firstName: '',
+        lastName: '',
+        idNumber: '',
+        email: '',
+        password: ''
+    })
+    const [isLoading, setIsLoading] = useState(false)
+    const [error, setError] = useState('')
+    const [success, setSuccess] = useState('')
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { id, value } = e.target
+        setFormData(prev => ({
+            ...prev,
+            [id]: value
+        }))
+        // Clear error when user starts typing
+        if (error) setError('')
+    }
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+        setIsLoading(true)
+        setError('')
+        setSuccess('')
+
+        try {
+            const response = await fetch('/api/signup', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            })
+
+            const data = await response.json()
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Something went wrong')
+            }
+
+            setSuccess('Account created successfully! You can now sign in.')
+            setFormData({
+                firstName: '',
+                lastName: '',
+                idNumber: '',
+                email: '',
+                password: ''
+            })
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Something went wrong')
+        } finally {
+            setIsLoading(false)
+        }
+    }
     return (
         <div className="flex items-center justify-center min-h-screen py-2">
             <div className="w-full max-w-md mx-auto">
@@ -31,36 +95,54 @@ export default function SignIn() {
                                     <p className="text-center text-sm">
                                         Welcome! Please fill in the details to get started.
                                     </p>
-                                </TextureCardHeader>                <TextureSeparator />
-                                <TextureCardContent className="px-4 py-3">
-                                    <form className="flex flex-col gap-4">
+                                </TextureCardHeader>                <TextureSeparator />                                <TextureCardContent className="px-4 py-3">
+                                    {error && (
+                                        <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-md">
+                                            <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+                                        </div>
+                                    )}
+                                    {success && (
+                                        <div className="mb-4 p-3 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-md">
+                                            <p className="text-sm text-green-600 dark:text-green-400">{success}</p>
+                                        </div>
+                                    )}
+                                    <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
                                         <div className="flex justify-between gap-2">
                                             <div>
-                                                <Label htmlFor="first" className="text-sm">First name</Label>
+                                                <Label htmlFor="firstName" className="text-sm">First name</Label>
                                                 <Input
-                                                    id="first"
-                                                    type="first"
+                                                    id="firstName"
+                                                    type="text"
                                                     required
+                                                    value={formData.firstName}
+                                                    onChange={handleInputChange}
+                                                    disabled={isLoading}
                                                     className="w-full px-3 py-1.5 text-sm rounded-md border border-neutral-300 dark:border-neutral-700 bg-white/80 dark:bg-neutral-800/80 placeholder-neutral-400 dark:placeholder-neutral-500"
                                                 />
                                             </div>
                                             <div>
-                                                <Label htmlFor="last" className="text-sm">Last Name</Label>
+                                                <Label htmlFor="lastName" className="text-sm">Last Name</Label>
                                                 <Input
-                                                    id="last"
-                                                    type="last"
+                                                    id="lastName"
+                                                    type="text"
                                                     required
+                                                    value={formData.lastName}
+                                                    onChange={handleInputChange}
+                                                    disabled={isLoading}
                                                     className="w-full px-3 py-1.5 text-sm rounded-md border border-neutral-300 dark:border-neutral-700 bg-white/80 dark:bg-neutral-800/80 placeholder-neutral-400 dark:placeholder-neutral-500"
                                                 />
                                             </div>
                                         </div>
 
                                         <div>
-                                            <Label htmlFor="id_number" className="text-sm">ID Number</Label>
+                                            <Label htmlFor="idNumber" className="text-sm">ID Number</Label>
                                             <Input
-                                                id="id_number"
-                                                type="number"
+                                                id="idNumber"
+                                                type="text"
                                                 required
+                                                value={formData.idNumber}
+                                                onChange={handleInputChange}
+                                                disabled={isLoading}
                                                 className="w-full px-3 py-1.5 text-sm rounded-md border border-neutral-300 dark:border-neutral-700 bg-white/80 dark:bg-neutral-800/80 placeholder-neutral-400 dark:placeholder-neutral-500"
                                             />
                                         </div>
@@ -70,6 +152,9 @@ export default function SignIn() {
                                                 id="email"
                                                 type="email"
                                                 required
+                                                value={formData.email}
+                                                onChange={handleInputChange}
+                                                disabled={isLoading}
                                                 className="w-full px-3 py-1.5 text-sm rounded-md border border-neutral-300 dark:border-neutral-700 bg-white/80 dark:bg-neutral-800/80 placeholder-neutral-400 dark:placeholder-neutral-500"
                                             />
                                         </div>
@@ -79,17 +164,29 @@ export default function SignIn() {
                                                 id="password"
                                                 type="password"
                                                 required
+                                                value={formData.password}
+                                                onChange={handleInputChange}
+                                                disabled={isLoading}
+                                                minLength={6}
                                                 className="w-full px-3 py-1.5 text-sm rounded-md border border-neutral-300 dark:border-neutral-700 bg-white/80 dark:bg-neutral-800/80 placeholder-neutral-400 dark:placeholder-neutral-500"
                                             />
                                         </div>
                                     </form>
                                 </TextureCardContent>
-                                <TextureSeparator />
-                                <TextureCardFooter className="border-b rounded-b-sm p-3">
-                                    <NeumorphButton fullWidth>
+                                <TextureSeparator />                                <TextureCardFooter className="border-b rounded-b-sm p-3">
+                                    <NeumorphButton fullWidth type="submit" disabled={isLoading} onClick={handleSubmit}>
                                         <div className="flex gap-1 items-center justify-center">
-                                            Continue
-                                            <ArrowRight className="h-4 w-4 text-neutral-50 mt-[1px]" />
+                                            {isLoading ? (
+                                                <>
+                                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                                    Creating account...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    Continue
+                                                    <ArrowRight className="h-4 w-4 text-neutral-50 mt-[1px]" />
+                                                </>
+                                            )}
                                         </div>
                                     </NeumorphButton>
                                 </TextureCardFooter>
