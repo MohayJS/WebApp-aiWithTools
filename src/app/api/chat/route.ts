@@ -12,13 +12,13 @@ const chatSessions = new Map();
 const serverParams = new StdioClientTransport({
   command: "node", // Executable
   args: [
-    "C:/xampp/htdocs/gemini-cli/mcp-database-server/dist/src/index.js",
+    process.env.MCP_SERVER_PATH!,
     "--mysql",
-    "--host", "localhost",
-    "--database", "classattendancedb",
-    "--port", "3306",
-    "--user", "root",
-    "--password", "Ngick13@"
+    "--host", process.env.DB_HOST!,
+    "--database", process.env.DB_DATABASE!,
+    "--port", process.env.DB_PORT!,
+    "--user", process.env.DB_USER!,
+    "--password", process.env.DB_PASSWORD!
   ],
 });
 
