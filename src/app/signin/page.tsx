@@ -17,19 +17,13 @@ import {
 } from "@/components/ui/texture-card"
 
 interface FormData {
-    firstName: string
-    lastName: string
-    idNumber: string
     email: string
     password: string
 }
 
-export default function SignUp() {
+export default function SignIn() {
     const router = useRouter()
     const [formData, setFormData] = useState<FormData>({
-        firstName: '',
-        lastName: '',
-        idNumber: '',
         email: '',
         password: ''
     })
@@ -54,7 +48,7 @@ export default function SignUp() {
         setSuccess('')
 
         try {
-            const response = await fetch('/api/signup', {
+            const response = await fetch('/api/signin', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -68,22 +62,32 @@ export default function SignUp() {
                 throw new Error(data.error || 'Something went wrong')
             }
 
-            setSuccess('Account created successfully! You can now sign in.')
+            setSuccess('Sign in successful! Redirecting...')
+            
+            // Store token in localStorage (you might want to use a more secure method)
+            localStorage.setItem('token', data.token)
+            localStorage.setItem('user', JSON.stringify(data.user))
+            
+            // Clear form
             setFormData({
-                firstName: '',
-                lastName: '',
-                idNumber: '',
                 email: '',
                 password: ''
             })
+            
+            // Redirect to main page or dashboard
+            setTimeout(() => {
+                router.push('/')
+            }, 1000)
+
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Something went wrong')
         } finally {
-            setIsLoading(false)        }
+            setIsLoading(false)
+        }
     }
 
-    const handleSignInRedirect = () => {
-        router.push('/signin')
+    const handleSignUpRedirect = () => {
+        router.push('/signup')
     }
 
     return (
@@ -103,11 +107,13 @@ export default function SignUp() {
                                     <div className="p-2 bg-neutral-950 rounded-full mb-2">
                                         <Merge className="h-6 w-6 stroke-neutral-200" />
                                     </div>
-                                    <TextureCardTitle>Create your account</TextureCardTitle>
+                                    <TextureCardTitle>Welcome back</TextureCardTitle>
                                     <p className="text-center text-sm">
-                                        Welcome! Please fill in the details to get started.
+                                        Please sign in to your account to continue.
                                     </p>
-                                </TextureCardHeader>                <TextureSeparator />                                <TextureCardContent className="px-4 py-3">
+                                </TextureCardHeader>
+                                <TextureSeparator />
+                                <TextureCardContent className="px-4 py-3">
                                     {error && (
                                         <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-md">
                                             <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
@@ -119,45 +125,6 @@ export default function SignUp() {
                                         </div>
                                     )}
                                     <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-                                        <div className="flex justify-between gap-2">
-                                            <div>
-                                                <Label htmlFor="firstName" className="text-sm">First name</Label>
-                                                <Input
-                                                    id="firstName"
-                                                    type="text"
-                                                    required
-                                                    value={formData.firstName}
-                                                    onChange={handleInputChange}
-                                                    disabled={isLoading}
-                                                    className="w-full px-3 py-1.5 text-sm rounded-md border border-neutral-300 dark:border-neutral-700 bg-white/80 dark:bg-neutral-800/80 placeholder-neutral-400 dark:placeholder-neutral-500"
-                                                />
-                                            </div>
-                                            <div>
-                                                <Label htmlFor="lastName" className="text-sm">Last Name</Label>
-                                                <Input
-                                                    id="lastName"
-                                                    type="text"
-                                                    required
-                                                    value={formData.lastName}
-                                                    onChange={handleInputChange}
-                                                    disabled={isLoading}
-                                                    className="w-full px-3 py-1.5 text-sm rounded-md border border-neutral-300 dark:border-neutral-700 bg-white/80 dark:bg-neutral-800/80 placeholder-neutral-400 dark:placeholder-neutral-500"
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <div>
-                                            <Label htmlFor="idNumber" className="text-sm">ID Number</Label>
-                                            <Input
-                                                id="idNumber"
-                                                type="text"
-                                                required
-                                                value={formData.idNumber}
-                                                onChange={handleInputChange}
-                                                disabled={isLoading}
-                                                className="w-full px-3 py-1.5 text-sm rounded-md border border-neutral-300 dark:border-neutral-700 bg-white/80 dark:bg-neutral-800/80 placeholder-neutral-400 dark:placeholder-neutral-500"
-                                            />
-                                        </div>
                                         <div>
                                             <Label htmlFor="email" className="text-sm">Email</Label>
                                             <Input
@@ -168,9 +135,9 @@ export default function SignUp() {
                                                 onChange={handleInputChange}
                                                 disabled={isLoading}
                                                 className="w-full px-3 py-1.5 text-sm rounded-md border border-neutral-300 dark:border-neutral-700 bg-white/80 dark:bg-neutral-800/80 placeholder-neutral-400 dark:placeholder-neutral-500"
+                                                placeholder="Enter your email"
                                             />
-                                        </div>
-                                        <div>
+                                        </div>                                        <div>
                                             <Label htmlFor="password" className="text-sm">Password</Label>
                                             <Input
                                                 id="password"
@@ -179,23 +146,29 @@ export default function SignUp() {
                                                 value={formData.password}
                                                 onChange={handleInputChange}
                                                 disabled={isLoading}
-                                                minLength={6}
                                                 className="w-full px-3 py-1.5 text-sm rounded-md border border-neutral-300 dark:border-neutral-700 bg-white/80 dark:bg-neutral-800/80 placeholder-neutral-400 dark:placeholder-neutral-500"
+                                                placeholder="Enter your password"
                                             />
+                                        </div>
+                                        <div className="text-right">
+                                            <span className="text-xs text-neutral-500 hover:text-primary cursor-pointer">
+                                                Forgot password?
+                                            </span>
                                         </div>
                                     </form>
                                 </TextureCardContent>
-                                <TextureSeparator />                                <TextureCardFooter className="border-b rounded-b-sm p-3">
+                                <TextureSeparator />
+                                <TextureCardFooter className="border-b rounded-b-sm p-3">
                                     <NeumorphButton fullWidth type="submit" disabled={isLoading} onClick={handleSubmit}>
                                         <div className="flex gap-1 items-center justify-center">
                                             {isLoading ? (
                                                 <>
                                                     <Loader2 className="h-4 w-4 animate-spin" />
-                                                    Creating account...
+                                                    Signing in...
                                                 </>
                                             ) : (
                                                 <>
-                                                    Continue
+                                                    Sign In
                                                     <ArrowRight className="h-4 w-4 text-neutral-50 mt-[1px]" />
                                                 </>
                                             )}
@@ -204,14 +177,15 @@ export default function SignUp() {
                                 </TextureCardFooter>
 
                                 <div className="dark:bg-neutral-800 bg-stone-100 pt-px rounded-b-[20px] overflow-hidden ">
-                                    <div className="flex flex-col items-center justify-center">                                        <div className="py-1.5 px-2">
+                                    <div className="flex flex-col items-center justify-center">
+                                        <div className="py-1.5 px-2">
                                             <div className="text-center text-sm">
-                                                Already have an account?{" "}
+                                                Don't have an account?{" "}
                                                 <span 
                                                     className="text-primary cursor-pointer hover:underline"
-                                                    onClick={handleSignInRedirect}
+                                                    onClick={handleSignUpRedirect}
                                                 >
-                                                    Sign in
+                                                    Sign up
                                                 </span>
                                             </div>
                                         </div>
