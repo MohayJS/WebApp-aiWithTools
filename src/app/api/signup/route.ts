@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { getConnection, initializeDatabase } from '@/lib/database';
 import { randomUUID } from 'crypto';
+import { sign } from 'jsonwebtoken';
 
 export async function POST(request: NextRequest) {
   try {
@@ -59,10 +60,22 @@ export async function POST(request: NextRequest) {
       [userId, firstName, lastName, idNumber, email, hashedPassword]
     );
 
-    // Return success response (don't include sensitive data)
+    // Generate JWT token for immediate login
+    const token = sign(
+      {
+        userId: userId,
+        email: email
+      },
+      process.env.JWT_SECRET || 'your-secret-key',
+      { expiresIn: '7d' }
+    );
+
+    // Return success response with token for immediate login
     return NextResponse.json(
       {
-        message: 'User created successfully',        user: {
+        message: 'User created successfully',
+        token,
+        user: {
           id: userId,
           firstName,
           lastName,

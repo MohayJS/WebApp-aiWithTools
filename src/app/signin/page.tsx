@@ -73,10 +73,9 @@ export default function SignIn() {
                 email: '',
                 password: ''
             })
-            
-            // Redirect to main page or dashboard
+              // Redirect to dashboard
             setTimeout(() => {
-                router.push('/')
+                router.push('/dashboard')
             }, 1000)
 
         } catch (err) {

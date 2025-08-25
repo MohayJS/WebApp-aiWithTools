@@ -59,8 +59,7 @@ export default function SignUp() {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(formData)
-            })
+                body: JSON.stringify(formData)            })
 
             const data = await response.json()
 
@@ -68,7 +67,13 @@ export default function SignUp() {
                 throw new Error(data.error || 'Something went wrong')
             }
 
-            setSuccess('Account created successfully! You can now sign in.')
+            setSuccess('Account created successfully! Redirecting...')
+            
+            // Store token and user data for immediate login
+            localStorage.setItem('token', data.token)
+            localStorage.setItem('user', JSON.stringify(data.user))
+            
+            // Clear form
             setFormData({
                 firstName: '',
                 lastName: '',
@@ -76,6 +81,11 @@ export default function SignUp() {
                 email: '',
                 password: ''
             })
+            
+            // Redirect to dashboard
+            setTimeout(() => {
+                router.push('/dashboard')
+            }, 1000)
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Something went wrong')
         } finally {
