@@ -54,3 +54,32 @@ export const logout = (): void => {
 export const isAuthenticated = (): boolean => {
   return !!getAuthToken();
 };
+
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+
+export const useAuth = () => {
+  const [user, setUserState] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
+
+  useEffect(() => {
+    const checkAuth = () => {
+      const token = getAuthToken();
+      const currentUser = getUser();
+
+      if (!token || !currentUser) {
+        setUserState(null);
+        setLoading(false);
+        return;
+      }
+
+      setUserState(currentUser);
+      setLoading(false);
+    };
+
+    checkAuth();
+  }, []);
+
+  return { user, loading };
+};
