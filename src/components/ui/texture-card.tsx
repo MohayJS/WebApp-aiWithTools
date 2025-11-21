@@ -128,9 +128,15 @@ const TextureCardFooter = React.forwardRef<
 ))
 TextureCardFooter.displayName = "TextureCardFooter"
 
-const TextureSeparator = () => {
+const TextureSeparator = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => {
   return (
-    <div className="border border-t-neutral-50 border-b-neutral-300/50 dark:border-t-neutral-950 dark:border-b-neutral-700/50 border-l-transparent border-r-transparent" />
+    <div
+      className={cn(
+        "border border-t-neutral-50 border-b-neutral-300/50 dark:border-t-neutral-950 dark:border-b-neutral-700/50 border-l-transparent border-r-transparent",
+        className
+      )}
+      {...props}
+    />
   )
 }
 

@@ -6,9 +6,6 @@ const dbConfig = {
   password: process.env.DB_PASSWORD,
   database: process.env.DB_DATABASE,
   port: parseInt(process.env.DB_PORT || '3306'),
-  ssl: {
-    rejectUnauthorized: false
-  }
 };
 
 let connection: mysql.Connection | null = null;
@@ -36,20 +33,22 @@ export async function closeConnection() {
 // Initialize users table if it doesn't exist
 export async function initializeDatabase() {
   const conn = await getConnection();
-  
+
   const createUsersTable = `
     CREATE TABLE IF NOT EXISTS users (
       id VARCHAR(255) PRIMARY KEY,
       firstName VARCHAR(100) NOT NULL,
+      middleName VARCHAR(100),
       lastName VARCHAR(100) NOT NULL,
       idNumber INT UNIQUE NOT NULL,
       email VARCHAR(255) UNIQUE NOT NULL,
       password VARCHAR(255) NOT NULL,
+      must_change_password BOOLEAN DEFAULT TRUE,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     )
   `;
-  
+
   try {
     await conn.execute(createUsersTable);
     console.log('Users table initialized successfully');

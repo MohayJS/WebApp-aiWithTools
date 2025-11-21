@@ -3,21 +3,32 @@
 import { useRouter } from 'next/navigation';
 import { NeumorphButton } from '@/components/ui/neumorph-button';
 import { TextureCard } from '@/components/ui/texture-card';
-import { 
-  GraduationCap, 
-  Bot, 
-  Zap, 
-  Shield, 
-  Clock, 
+import { useAuth } from '@/context/AuthContext';
+import {
+  GraduationCap,
+  Bot,
+  Zap,
+  Shield,
+  Clock,
   Users,
   ArrowRight,
   CheckCircle,
   Star,
-  Building2
+  Building2,
+  LayoutDashboard
 } from 'lucide-react';
 
 export default function Home() {
   const router = useRouter();
+  const { user } = useAuth();
+
+  const handleAuthNavigation = () => {
+    if (user) {
+      router.push('/dashboard');
+    } else {
+      router.push('/signin');
+    }
+  };
 
   return (
     <main className="min-h-screen w-full bg-[#fefcff] relative overflow-x-hidden">
@@ -45,18 +56,19 @@ export default function Home() {
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <NeumorphButton 
-              onClick={() => router.push('/signin')} 
-              intent="secondary"
+            <NeumorphButton
+              onClick={handleAuthNavigation}
+              intent="primary"
               size="medium"
             >
-              Sign In
-            </NeumorphButton>
-            <NeumorphButton 
-              onClick={() => router.push('/signup')} 
-              size="medium"
-            >
-              Get Started
+              {user ? (
+                <div className="flex items-center gap-2">
+                  <LayoutDashboard className="h-4 w-4" />
+                  Dashboard
+                </div>
+              ) : (
+                "Sign In"
+              )}
             </NeumorphButton>
           </div>
         </div>
@@ -75,31 +87,21 @@ export default function Home() {
               <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"> Student ID</span>
             </h1>
             <p className="text-xl text-gray-700 max-w-3xl mx-auto leading-relaxed">
-              Experience the future of university enrollment at Mindanao State University. 
-              Our AI agent handles everything - from course selection to schedule optimization - 
+              Experience the future of university enrollment at Mindanao State University.
+              Our AI agent handles everything - from course selection to schedule optimization -
               all you need is your student ID number.
             </p>
           </div>
-          
+
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
-            <NeumorphButton 
-              onClick={() => router.push('/signup')} 
+            <NeumorphButton
+              onClick={handleAuthNavigation}
               size="large"
               className="group"
             >
               <div className="flex items-center gap-3">
-                Start Enrollment
+                {user ? "Go to Dashboard" : "Sign In to Enroll"}
                 <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
-              </div>
-            </NeumorphButton>
-            <NeumorphButton 
-              onClick={() => router.push('/signin')} 
-              intent="secondary"
-              size="large"
-            >
-              <div className="flex items-center gap-3">
-                <Users className="h-5 w-5" />
-                Existing Student
               </div>
             </NeumorphButton>
           </div>
@@ -179,7 +181,7 @@ export default function Home() {
               <p className="text-xl text-gray-700 mb-8">
                 Revolutionary technology meets traditional academic excellence at Mindanao State University
               </p>
-              
+
               <div className="space-y-6">
                 <div className="flex items-start gap-4">
                   <div className="bg-blue-100 p-2 rounded-lg">
@@ -190,7 +192,7 @@ export default function Home() {
                     <p className="text-gray-700">Complete your enrollment in seconds, not hours</p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-start gap-4">
                   <div className="bg-purple-100 p-2 rounded-lg">
                     <Shield className="h-6 w-6 text-purple-600" />
@@ -200,7 +202,7 @@ export default function Home() {
                     <p className="text-gray-700">Bank-level security protecting your academic data</p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-start gap-4">
                   <div className="bg-green-100 p-2 rounded-lg">
                     <Clock className="h-6 w-6 text-green-600" />
@@ -212,7 +214,7 @@ export default function Home() {
                 </div>
               </div>
             </div>
-            
+
             <div className="relative">
               <TextureCard className="p-8">
                 <div className="bg-gradient-to-br from-blue-600 to-purple-600 p-6 rounded-2xl text-white text-center">
@@ -239,13 +241,13 @@ export default function Home() {
           <p className="text-xl text-gray-700 mb-8">
             Join thousands of MSU students who have already simplified their enrollment process
           </p>
-          <NeumorphButton 
-            onClick={() => router.push('/signup')} 
+          <NeumorphButton
+            onClick={handleAuthNavigation}
             size="large"
             className="group"
           >
             <div className="flex items-center gap-3">
-              Get Started Now
+              {user ? "Go to Dashboard" : "Sign In Now"}
               <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
             </div>
           </NeumorphButton>

@@ -7,21 +7,12 @@ export async function POST(request: NextRequest) {
   try {
     // Parse the request body
     const body = await request.json();
-    const { email, password } = body;
+    const { identifier, password } = body;
 
     // Validate required fields
-    if (!email || !password) {
+    if (!identifier || !password) {
       return NextResponse.json(
-        { error: 'Email and password are required' },
-        { status: 400 }
-      );
-    }
-
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return NextResponse.json(
-        { error: 'Invalid email format' },
+        { error: 'Email/ID and password are required' },
         { status: 400 }
       );
     }
@@ -30,15 +21,27 @@ export async function POST(request: NextRequest) {
     await initializeDatabase();
     const connection = await getConnection();
 
-    // Find user by email
-    const [users] = await connection.execute(
-      'SELECT id, firstName, lastName, email, idNumber, password FROM users WHERE email = ?',
-      [email]
-    );
+    // Find user by email OR idNumber
+    // We check if identifier looks like an email or a number
+    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier);
+
+    let query = 'SELECT id, firstName, lastName, email, idNumber, password, must_change_password FROM users WHERE ';
+    let params = [];
+
+    if (isEmail) {
+      query += 'email = ?';
+      params.push(identifier);
+    } else {
+      // Assume it's an ID number
+      query += 'idNumber = ?';
+      params.push(identifier);
+    }
+
+    const [users] = await connection.execute(query, params);
 
     if (!Array.isArray(users) || users.length === 0) {
       return NextResponse.json(
-        { error: 'Invalid email or password' },
+        { error: 'Invalid credentials' },
         { status: 401 }
       );
     }
@@ -49,12 +52,12 @@ export async function POST(request: NextRequest) {
     const passwordMatch = await bcrypt.compare(password, user.password);
     if (!passwordMatch) {
       return NextResponse.json(
-        { error: 'Invalid email or password' },
+        { error: 'Invalid credentials' },
         { status: 401 }
       );
     }
 
-    // Generate JWT token (you might want to add JWT_SECRET to your environment variables)
+    // Generate JWT token
     const token = sign(
       {
         userId: user.id,
@@ -64,7 +67,7 @@ export async function POST(request: NextRequest) {
       { expiresIn: '7d' }
     );
 
-    // Return success response (don't include password)
+    // Return success response
     return NextResponse.json(
       {
         message: 'Sign in successful',
@@ -74,7 +77,8 @@ export async function POST(request: NextRequest) {
           firstName: user.firstName,
           lastName: user.lastName,
           email: user.email,
-          idNumber: user.idNumber
+          idNumber: user.idNumber,
+          mustChangePassword: !!user.must_change_password
         }
       },
       { status: 200 }
@@ -82,7 +86,7 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('Sign in error:', error);
-    
+
     return NextResponse.json(
       { error: 'Internal server error. Please try again later.' },
       { status: 500 }

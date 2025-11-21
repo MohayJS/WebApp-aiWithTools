@@ -4,6 +4,7 @@ export interface User {
   lastName: string;
   email: string;
   idNumber: string;
+  mustChangePassword?: boolean;
 }
 
 export const AUTH_TOKEN_KEY = 'token';
