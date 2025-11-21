@@ -1,0 +1,8 @@
+"my-mcp-server-81208714": {
+  "type": "stdio",
+  "command": "node",
+  "args": [
+    "--env-file=${workspaceFolder}/.env",
+    "${workspaceFolder}/mcp-wrapper.js"
+  ]
+}
