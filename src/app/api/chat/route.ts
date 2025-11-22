@@ -121,25 +121,44 @@ export async function POST(request: NextRequest) {
         2. ONLY show sections for courses that are in the eligible_courses list from check_eligible_courses.
         3. NEVER recommend or show sections for courses in the not_eligible_courses list.
         4. If a student asks about a specific course that's not eligible, explain why (missing prerequisites) and suggest they complete the prerequisites first.
+        5. If a student asks "can you enroll me?" or "enroll me" without specifying courses:
+           a) First, use check_eligible_courses to see what they can take.
+           b) Then, list the eligible courses (Code and Title) and ask which ones they want to enroll in.
+           c) DO NOT ask for "Course IDs". Ask for the Course Code (e.g., "CS101") or Name.
 
         Rules:
-        5. Always use the User UUID (${user.id}) when calling tools that require 'student_id'. Do NOT use the Display ID.
-        6. When listing courses or sections, present them in a clear, readable format (e.g., tables or bullet points).
-        7. Before enrolling a student, you can check if they are already enrolled or if there are conflicts if the tools allow, but primarily rely on the tool's return message.
-        8. If a tool returns an error, explain it clearly to the student.
-        9. Be polite and professional.
-        10. You have access to tools to list courses, list sections, check enrollments, enroll/drop students, check prerequisites, and check eligible courses. Use them!
+        6. Always use the User UUID (${user.id}) when calling tools that require 'student_id'. Do NOT use the Display ID.
+        7. When listing courses or sections, present them in a clear, readable format (e.g., tables or bullet points).
+        8. Before enrolling a student, you can check if they are already enrolled or if there are conflicts if the tools allow, but primarily rely on the tool's return message.
+        9. If a tool returns an error, explain it clearly to the student.
+        10. Be polite and professional.
+        11. You have access to tools to list courses, list sections, check enrollments, enroll/drop students, check prerequisites, and check eligible courses. Use them!
+        12. NEVER ask the user for internal IDs (like UUIDs or database IDs). Always use human-readable identifiers like Course Codes (e.g., CS101) or Section Codes (e.g., A, B).
         
         Section Recommendations:
-        11. When a student asks you to choose sections for them or says "you decide", you SHOULD make recommendations and proceed with enrollment.
-        12. To recommend sections, FIRST use check_eligible_courses to confirm eligibility, THEN use list_sections for ONLY the eligible courses.
-        13. Prioritize sections based on:
+        13. When a student asks you to choose sections for them or says "you decide", you SHOULD make recommendations.
+        14. To recommend sections, FIRST use check_eligible_courses to confirm eligibility, THEN use list_sections for ONLY the eligible courses.
+        15. Prioritize sections based on:
            - Availability (not full)
            - Balanced schedule (avoid back-to-back classes if possible)
            - Morning vs afternoon preferences if mentioned
-        14. When recommending, explain briefly why you chose each section (e.g., "Section A has good availability and fits well in your schedule").
-        15. You can use the batch enrollment feature by providing multiple section IDs to enroll_student (e.g., section_ids="1,2,3").
-        16. After making recommendations and getting student approval (or if they explicitly say "enroll me" or "you decide"), proceed with the enrollment.
+        16. When recommending, explain briefly why you chose each section (e.g., "Section A has good availability and fits well in your schedule").
+        
+        ENROLLMENT CONFIRMATION REQUIREMENT (CRITICAL):
+        17. NEVER call enroll_student tool without EXPLICIT user confirmation first.
+        18. Before enrolling, you MUST:
+            a) Clearly inform the user about ALL sections they will be enrolled in (with course names, section details, schedule, instructor)
+            b) Explicitly ask "Would you like me to proceed with enrolling you in these sections?" or similar confirmation question
+            c) Wait for the user's affirmative response (e.g., "yes", "confirm", "proceed", "enroll me")
+        19. ONLY after receiving explicit confirmation should you call the enroll_student tool.
+        20. You can use the batch enrollment feature by providing multiple section IDs to enroll_student (e.g., section_ids="1,2,3").
+        21. If the user says "you decide" or "choose for me", this means they want YOU to recommend sections, but you MUST still inform them of your choices and ask for confirmation before enrolling.
+
+        STRICT TOOL USAGE:
+        22. Do NOT use any tools that are not explicitly provided in your tool definitions.
+        23. Do NOT use 'code_output', 'python', or any code execution tools.
+        24. If a tool returns empty results (e.g., []), simply state that no results were found in natural language. Do NOT try to output the raw JSON or debug it with other tools.
+        25. When using get_student_enrollments, the tool returns a JSON string. You must parse this internally and describe the enrollments to the user. DO NOT output the raw JSON or call any other tools with it.
       `;
 
       // Fetch tools from MCP
@@ -161,13 +180,42 @@ export async function POST(request: NextRequest) {
 
     // Simple loop for tool calls (max 5 turns to prevent infinite loops)
     let turns = 0;
-    const functionCalls = response.functionCalls();
+    let functionCalls = response.functionCalls();
+
+    // Fallback: Manually check for function calls if SDK helper returns empty but we see them in parts
+    if (
+      (!functionCalls || functionCalls.length === 0) &&
+      response.candidates?.[0]?.content?.parts
+    ) {
+      const parts = response.candidates[0].content.parts;
+      const manualCalls = parts
+        .filter((part: any) => part.functionCall)
+        .map((part: any) => part.functionCall);
+
+      if (manualCalls.length > 0) {
+        console.log(
+          `[Chat] Manually detected ${manualCalls.length} function calls`
+        );
+        functionCalls = manualCalls;
+      }
+    }
+
+    console.log(
+      `[Chat] Initial response finishReason: ${response.candidates?.[0]?.finishReason}`
+    );
+    console.log(
+      `[Chat] Initial function calls found: ${functionCalls?.length || 0}`
+    );
 
     while (functionCalls && functionCalls.length > 0 && turns < 5) {
       turns++;
+      console.log(
+        `[Chat] Turn ${turns}: Processing ${functionCalls.length} function calls`
+      );
       const functionResponses = [];
 
       for (const call of functionCalls) {
+        console.log(`[Chat] Calling tool: ${call.name} with args:`, call.args);
         try {
           const toolResult = (await client.callTool({
             name: call.name,
@@ -179,6 +227,10 @@ export async function POST(request: NextRequest) {
             .map((c: any) => (c.type === "text" ? c.text : ""))
             .join("\n");
 
+          console.log(
+            `[Chat] Tool ${call.name} result length: ${resultText.length}`
+          );
+
           functionResponses.push({
             functionResponse: {
               name: call.name,
@@ -186,6 +238,7 @@ export async function POST(request: NextRequest) {
             },
           });
         } catch (e: any) {
+          console.error(`[Chat] Tool ${call.name} failed:`, e);
           functionResponses.push({
             functionResponse: {
               name: call.name,
@@ -198,11 +251,71 @@ export async function POST(request: NextRequest) {
       // Send tool results back to model
       result = await chat.sendMessage(functionResponses);
       response = result.response;
+      functionCalls = response.functionCalls();
+
+      // Fallback check again inside loop
+      if (
+        (!functionCalls || functionCalls.length === 0) &&
+        response.candidates?.[0]?.content?.parts
+      ) {
+        const parts = response.candidates[0].content.parts;
+        const manualCalls = parts
+          .filter((part: any) => part.functionCall)
+          .map((part: any) => part.functionCall);
+
+        if (manualCalls.length > 0) {
+          console.log(
+            `[Chat] Manually detected ${manualCalls.length} function calls in loop`
+          );
+          functionCalls = manualCalls;
+        }
+      }
+
+      console.log(
+        `[Chat] Turn ${turns} complete. Next function calls: ${
+          functionCalls?.length || 0
+        }`
+      );
+    }
+
+    if (turns >= 5) {
+      console.warn("[Chat] Reached max turns limit (5)");
+    }
+
+    let responseText = "";
+    try {
+      responseText = response.text();
+    } catch (e) {
+      // text() might throw if the response is blocked or incomplete
+      console.warn("Could not get response text:", e);
+    }
+
+    // Handle malformed function calls
+    if (
+      !responseText &&
+      response.candidates?.[0]?.finishReason === "MALFORMED_FUNCTION_CALL"
+    ) {
+      responseText =
+        "I apologize, but I encountered a technical issue (Malformed Function Call). Please try asking your question again.";
+      console.warn(
+        "Malformed function call detected:",
+        response.candidates[0].finishMessage
+      );
+    }
+
+    // Handle empty response after tool calls (if model returns nothing)
+    if (!responseText && turns > 0) {
+      responseText = "I have processed your request."; // Default fallback
+      // Try to see if there is any content at all
+      if (response.candidates?.[0]?.content?.parts?.[0]?.text) {
+        responseText = response.candidates[0].content.parts[0].text;
+      }
     }
 
     return NextResponse.json({
-      response: response.text(),
+      response: responseText,
       sessionId,
+      aiResponse: response,
     });
   } catch (error: any) {
     console.error("Error in chat API:", error);

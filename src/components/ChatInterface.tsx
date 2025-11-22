@@ -72,6 +72,7 @@ export default function ChatInterface({ user }: ChatInterfaceProps) {
       }
 
       const data = await response.json();
+      console.log(data);
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
