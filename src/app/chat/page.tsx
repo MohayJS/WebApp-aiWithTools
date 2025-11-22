@@ -18,7 +18,7 @@ export default function ChatPage() {
 
     return (
         <DashboardLayout user={user}>
-            <div className="h-screen flex flex-col">
+            <div className="h-screen p-6 flex flex-col">
                 <ChatInterface user={user} />
             </div>
         </DashboardLayout>
