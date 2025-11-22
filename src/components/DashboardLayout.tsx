@@ -41,7 +41,7 @@ export default function DashboardLayout({ children, user }: DashboardLayoutProps
   ];
 
   return (
-    <div className="min-h-screen w-full bg-[#fefcff] relative flex">
+    <div className="min-h-screen w-full bg-[#fefcff] relative">
       {/* Background */}
       <div className="absolute inset-0 z-0"
         style={{
@@ -57,11 +57,11 @@ export default function DashboardLayout({ children, user }: DashboardLayoutProps
           <SidebarHeader>
             <div className="flex items-center gap-3">
               <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center">
-                <span className="text-white font-semibold text-sm">W</span>
+                <span className="text-white font-semibold text-[10px]">OE</span>
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-gray-800">WebApp</h2>
-                <p className="text-xs text-gray-600">LLM Tools</p>
+                <h2 className="text-lg font-semibold text-gray-800">Online Enrollment</h2>
+                <p className="text-xs text-gray-600">Student Portal</p>
               </div>
             </div>
           </SidebarHeader>
@@ -115,8 +115,8 @@ export default function DashboardLayout({ children, user }: DashboardLayoutProps
         </Sidebar>
       </div>
 
-      {/* Main content */}
-      <div className="flex-1 relative z-10">
+      {/* Main content with left margin for fixed sidebar */}
+      <div className="ml-64 relative z-10 min-h-screen">
         {children}
       </div>
     </div>
