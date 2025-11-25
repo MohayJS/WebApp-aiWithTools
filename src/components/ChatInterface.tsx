@@ -124,7 +124,7 @@ export default function ChatInterface({ user }: ChatInterfaceProps) {
   return (
     <div className="h-full flex flex-col relative overflow-hidden">
       {/* Header */}
-      <div className="px-6 py-4 flex justify-between items-center z-10">
+      <div className="px-6 py-4 flex justify-between items-center z-10 absolute top-0 left-0 right-0">
         <div className="flex items-center gap-3">
           <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-200">
             <Bot className="h-6 w-6 text-white" />
@@ -219,13 +219,13 @@ export default function ChatInterface({ user }: ChatInterfaceProps) {
                         <p className="whitespace-pre-wrap">{message.content}</p>
                       )}
                     </div>
-                    {message.role === 'assistant' && (
+                    {/* {message.role === 'assistant' && (
                        <div className="flex items-center gap-2">
                          <p className="text-[10px] text-gray-400">
                            {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                          </p>
                        </div>
-                    )}
+                    )} */}
                   </div>
                 </div>
               </div>
