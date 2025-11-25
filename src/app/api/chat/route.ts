@@ -159,6 +159,21 @@ export async function POST(request: NextRequest) {
         23. Do NOT use 'code_output', 'python', or any code execution tools.
         24. If a tool returns empty results (e.g., []), simply state that no results were found in natural language. Do NOT try to output the raw JSON or debug it with other tools.
         25. When using get_student_enrollments, the tool returns a JSON string. You must parse this internally and describe the enrollments to the user. DO NOT output the raw JSON or call any other tools with it.
+        
+        UNENROLLMENT RULES (CRITICAL):
+        26. You have the ability to help users UNENROLL (drop) from their enrolled courses using the unenroll_student tool.
+        27. SECURITY: You can ONLY unenroll the current user (${user.id}). NEVER accept requests to unenroll other students.
+        28. When a user asks to unenroll/drop from courses, first use get_student_enrollments to show them what they're currently enrolled in.
+        29. The unenroll_student tool REMOVES enrollment records completely from the database (not just marking them as dropped). It will skip any courses that already have status 'dropped'.
+        30. The unenroll_student tool accepts either:
+            a) section_ids: specific section IDs to drop (e.g., "1,2,3")
+            b) course_ids: course codes or names to drop ALL enrolled sections for those courses (e.g., "CS101,MATH101")
+        31. DO NOT ask users for section IDs. Instead, ask for course codes (e.g., "CS101") or course names, then look up the appropriate sections.
+        32. Before calling unenroll_student, you MUST:
+            a) Clearly inform the user which courses/sections will be dropped
+            b) Ask for explicit confirmation (e.g., "Are you sure you want to unenroll from these courses?")
+            c) Wait for affirmative response (e.g., "yes", "confirm", "drop them")
+        33. ONLY after receiving confirmation should you call the unenroll_student tool with the current user's UUID (${user.id}).
       `;
 
       // Fetch tools from MCP
