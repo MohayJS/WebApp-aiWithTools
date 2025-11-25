@@ -1,21 +1,19 @@
-"use client"
+"use client";
 
 import { useRouter } from 'next/navigation';
-import { NeumorphButton } from '@/components/ui/neumorph-button';
-import { TextureCard } from '@/components/ui/texture-card';
 import { useAuth } from '@/context/AuthContext';
+import { NeuralBackground } from '@/components/ui/neural-background';
+import { motion } from 'framer-motion';
 import {
-  GraduationCap,
   Bot,
+  Sparkles,
   Zap,
-  Shield,
-  Clock,
-  Users,
+  ShieldCheck,
   ArrowRight,
-  CheckCircle,
-  Star,
-  Building2,
-  LayoutDashboard
+  GraduationCap,
+  Calendar,
+  BookOpen,
+  CheckCircle2
 } from 'lucide-react';
 
 export default function Home() {
@@ -30,247 +28,229 @@ export default function Home() {
     }
   };
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.2,
+        delayChildren: 0.3,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        type: "spring" as const,
+        stiffness: 100,
+      },
+    },
+  };
+
   return (
-    <main className="min-h-screen w-full bg-[#fefcff] relative overflow-x-hidden">
-      {/* Background */}
-      <div className="absolute inset-0 z-0"
-        style={{
-          backgroundImage: `
-          radial-gradient(circle at 30% 70%, rgba(173, 216, 230, 0.35), transparent 60%),
-          radial-gradient(circle at 70% 30%, rgba(255, 182, 193, 0.4), transparent 60%),
-          radial-gradient(circle at 80% 80%, rgba(144, 238, 144, 0.3), transparent 60%)`,
-        }}
-      >
-      </div>
+    <main className="min-h-screen w-full relative overflow-x-hidden text-white font-sans selection:bg-blue-500/30">
+      <NeuralBackground />
+      
+      {/* Overlay Gradient */}
+      <div className="fixed inset-0 z-0 bg-gradient-to-b from-transparent via-slate-950/50 to-slate-950 pointer-events-none" />
 
       {/* Navigation */}
-      <nav className="relative z-10 p-6">
-        <div className="flex justify-between items-center max-w-7xl mx-auto">
+      <nav className="relative z-50 p-6 backdrop-blur-sm border-b border-white/5">
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <div className="bg-gradient-to-br from-blue-600 to-purple-600 p-2 rounded-xl">
-              <GraduationCap className="h-8 w-8 text-white" />
+            <div className="bg-gradient-to-tr from-blue-600 to-purple-600 p-2.5 rounded-xl shadow-lg shadow-blue-500/20">
+              <Bot className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-gray-800">MSU Enrollment AI</h1>
-              <p className="text-sm text-gray-600">Mindanao State University</p>
+              <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">
+                Enrollment AI
+              </h1>
             </div>
           </div>
-          <div className="flex items-center gap-4">
-            <NeumorphButton
-              onClick={handleAuthNavigation}
-              intent="primary"
-              size="medium"
-            >
-              {user ? (
-                <div className="flex items-center gap-2">
-                  <LayoutDashboard className="h-4 w-4" />
-                  Dashboard
-                </div>
-              ) : (
-                "Sign In"
-              )}
-            </NeumorphButton>
-          </div>
+          <button
+            onClick={handleAuthNavigation}
+            className="px-5 py-2.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 backdrop-blur-md transition-all duration-300 font-medium text-sm flex items-center gap-2 group"
+          >
+            {user ? 'Dashboard' : 'Sign In'}
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </button>
         </div>
       </nav>
 
       {/* Hero Section */}
-      <section className="relative z-10 px-6 py-16">
-        <div className="max-w-7xl mx-auto text-center">
-          <div className="mb-8">
-            <div className="inline-flex items-center gap-2 bg-white/60 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium text-blue-700 mb-6">
-              <Star className="h-4 w-4" />
-              Revolutionary AI-Powered Enrollment
-            </div>
-            <h1 className="text-6xl font-bold text-gray-900 mb-6 leading-tight">
-              Enroll with Just Your
-              <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"> Student ID</span>
-            </h1>
-            <p className="text-xl text-gray-700 max-w-3xl mx-auto leading-relaxed">
-              Experience the future of university enrollment at Mindanao State University.
-              Our AI agent handles everything - from course selection to schedule optimization -
-              all you need is your student ID number.
-            </p>
-          </div>
+      <section className="relative z-10 pt-20 pb-32 px-6">
+        <motion.div
+          className="max-w-7xl mx-auto text-center"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          <motion.div variants={itemVariants} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-sm font-medium mb-8 backdrop-blur-md">
+            <Sparkles className="w-4 h-4" />
+            <span>The Future of Academic Enrollment</span>
+          </motion.div>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
-            <NeumorphButton
+          <motion.h1 variants={itemVariants} className="text-5xl md:text-7xl font-bold mb-8 tracking-tight leading-tight">
+            Enrollment, <br />
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 animate-gradient-x">
+              Reimagined with AI
+            </span>
+          </motion.h1>
+
+          <motion.p variants={itemVariants} className="text-xl text-slate-400 max-w-2xl mx-auto mb-12 leading-relaxed">
+            Forget long lines and confusing forms. Chat with your personal AI assistant to handle your schedule, check prerequisites, and enroll in seconds.
+          </motion.p>
+
+          <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <button
               onClick={handleAuthNavigation}
-              size="large"
-              className="group"
+              className="px-8 py-4 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold text-lg shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-300 transform hover:-translate-y-1"
             >
-              <div className="flex items-center gap-3">
-                {user ? "Go to Dashboard" : "Sign In to Enroll"}
-                <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
-              </div>
-            </NeumorphButton>
-          </div>
-
-          {/* Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-            <div className="text-center">
-              <div className="text-4xl font-bold text-blue-600 mb-2">30 sec</div>
-              <div className="text-gray-700">Average enrollment time</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl font-bold text-purple-600 mb-2">99.9%</div>
-              <div className="text-gray-700">Accuracy rate</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl font-bold text-green-600 mb-2">24/7</div>
-              <div className="text-gray-700">Available anytime</div>
-            </div>
-          </div>
-        </div>
+              Start Chatting Now
+            </button>
+            <button className="px-8 py-4 rounded-full bg-slate-800/50 hover:bg-slate-800 border border-white/10 backdrop-blur-md text-white font-medium text-lg transition-all duration-300">
+              Watch Demo
+            </button>
+          </motion.div>
+        </motion.div>
       </section>
 
-      {/* Features Section */}
-      <section className="relative z-10 px-6 py-20">
+      {/* Features Grid */}
+      <section className="relative z-10 py-24 px-6 bg-slate-950/50 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              How It Works
-            </h2>
-            <p className="text-xl text-gray-700 max-w-2xl mx-auto">
-              Three simple steps to complete your enrollment with AI assistance
-            </p>
-          </div>
-
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <TextureCard className="p-8 text-center group hover:scale-105 transition-transform">
-              <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-4 rounded-2xl w-16 h-16 mx-auto mb-6 group-hover:scale-110 transition-transform">
-                <Users className="h-8 w-8 text-white" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-4">1. Enter Student ID</h3>
-              <p className="text-gray-700">
-                Simply provide your MSU student ID number - that's all we need to get started
-              </p>
-            </TextureCard>
-
-            <TextureCard className="p-8 text-center group hover:scale-105 transition-transform">
-              <div className="bg-gradient-to-br from-purple-500 to-purple-600 p-4 rounded-2xl w-16 h-16 mx-auto mb-6 group-hover:scale-110 transition-transform">
-                <Bot className="h-8 w-8 text-white" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-4">2. AI Does the Work</h3>
-              <p className="text-gray-700">
-                Our intelligent agent analyzes your academic record and suggests optimal course combinations
-              </p>
-            </TextureCard>
-
-            <TextureCard className="p-8 text-center group hover:scale-105 transition-transform">
-              <div className="bg-gradient-to-br from-green-500 to-green-600 p-4 rounded-2xl w-16 h-16 mx-auto mb-6 group-hover:scale-110 transition-transform">
-                <CheckCircle className="h-8 w-8 text-white" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-4">3. Instant Enrollment</h3>
-              <p className="text-gray-700">
-                Review and confirm your schedule - enrollment complete in under a minute
-              </p>
-            </TextureCard>
+            <FeatureCard
+              icon={<Bot className="w-8 h-8 text-blue-400" />}
+              title="Natural Language"
+              description="Just ask 'What courses can I take?' or 'Enroll me in Math 101'. No complex codes needed."
+              delay={0.2}
+            />
+            <FeatureCard
+              icon={<Zap className="w-8 h-8 text-purple-400" />}
+              title="Instant Processing"
+              description="Our AI checks prerequisites, conflicts, and slot availability in milliseconds."
+              delay={0.4}
+            />
+            <FeatureCard
+              icon={<ShieldCheck className="w-8 h-8 text-green-400" />}
+              title="Smart Validation"
+              description="Never worry about invalid schedules. The AI ensures you meet all requirements before enrolling."
+              delay={0.6}
+            />
           </div>
         </div>
       </section>
 
-      {/* Benefits Section */}
-      <section className="relative z-10 px-6 py-20 bg-white/30 backdrop-blur-sm">
+      {/* How It Works */}
+      <section className="relative z-10 py-32 px-6">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <div>
-              <h2 className="text-4xl font-bold text-gray-900 mb-6">
-                Why Choose MSU AI Enrollment?
-              </h2>
-              <p className="text-xl text-gray-700 mb-8">
-                Revolutionary technology meets traditional academic excellence at Mindanao State University
-              </p>
+          <div className="text-center mb-20">
+            <h2 className="text-3xl md:text-5xl font-bold mb-6">How It Works</h2>
+            <p className="text-slate-400 text-lg">Three simple steps to your perfect schedule</p>
+          </div>
 
-              <div className="space-y-6">
-                <div className="flex items-start gap-4">
-                  <div className="bg-blue-100 p-2 rounded-lg">
-                    <Zap className="h-6 w-6 text-blue-600" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Lightning Fast</h3>
-                    <p className="text-gray-700">Complete your enrollment in seconds, not hours</p>
-                  </div>
-                </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative">
+            {/* Connecting Line (Desktop) */}
+            <div className="hidden md:block absolute top-12 left-0 w-full h-0.5 bg-gradient-to-r from-blue-500/0 via-blue-500/30 to-blue-500/0" />
 
-                <div className="flex items-start gap-4">
-                  <div className="bg-purple-100 p-2 rounded-lg">
-                    <Shield className="h-6 w-6 text-purple-600" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Secure & Reliable</h3>
-                    <p className="text-gray-700">Bank-level security protecting your academic data</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-4">
-                  <div className="bg-green-100 p-2 rounded-lg">
-                    <Clock className="h-6 w-6 text-green-600" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">24/7 Availability</h3>
-                    <p className="text-gray-700">Enroll anytime, anywhere - no more waiting in lines</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="relative">
-              <TextureCard className="p-8">
-                <div className="bg-gradient-to-br from-blue-600 to-purple-600 p-6 rounded-2xl text-white text-center">
-                  <Building2 className="h-12 w-12 mx-auto mb-4" />
-                  <h3 className="text-xl font-bold mb-2">Mindanao State University</h3>
-                  <p className="text-blue-100 mb-4">Main Campus</p>
-                  <div className="bg-white/20 rounded-lg p-4">
-                    <div className="text-2xl font-bold">15,000+</div>
-                    <div className="text-sm text-blue-100">Students Enrolled</div>
-                  </div>
-                </div>
-              </TextureCard>
-            </div>
+            <StepCard
+              number="01"
+              icon={<GraduationCap className="w-6 h-6" />}
+              title="Connect"
+              description="Sign in with your student ID. The AI instantly loads your academic history."
+            />
+            <StepCard
+              number="02"
+              icon={<BookOpen className="w-6 h-6" />}
+              title="Consult"
+              description="Chat with the AI to find courses, check sections, and plan your semester."
+            />
+            <StepCard
+              number="03"
+              icon={<CheckCircle2 className="w-6 h-6" />}
+              title="Confirm"
+              description="Review your generated schedule and confirm enrollment with one click."
+            />
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="relative z-10 px-6 py-20">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl font-bold text-gray-900 mb-6">
-            Ready to Experience the Future?
-          </h2>
-          <p className="text-xl text-gray-700 mb-8">
-            Join thousands of MSU students who have already simplified their enrollment process
-          </p>
-          <NeumorphButton
-            onClick={handleAuthNavigation}
-            size="large"
-            className="group"
-          >
-            <div className="flex items-center gap-3">
-              {user ? "Go to Dashboard" : "Sign In Now"}
-              <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
-            </div>
-          </NeumorphButton>
+      {/* Stats Section */}
+      <section className="relative z-10 py-24 border-y border-white/5 bg-white/5 backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+            <StatItem value="24/7" label="Availability" />
+            <StatItem value="< 1min" label="Avg. Enrollment Time" />
+            <StatItem value="100%" label="Accuracy" />
+            <StatItem value="Zero" label="Waiting in Line" />
+          </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="relative z-10 px-6 py-12 bg-gray-900 text-white">
-        <div className="max-w-7xl mx-auto text-center">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="bg-gradient-to-br from-blue-600 to-purple-600 p-2 rounded-xl">
-              <GraduationCap className="h-6 w-6 text-white" />
-            </div>
-            <span className="text-lg font-semibold">MSU Enrollment AI</span>
+      <footer className="relative z-10 py-12 px-6 border-t border-white/10 bg-slate-950">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+          <div className="flex items-center gap-2 text-slate-400">
+            <Bot className="w-5 h-5" />
+            <span className="font-medium">Enrollment AI</span>
           </div>
-          <p className="text-gray-400 mb-4">
-            Mindanao State University - Main Campus
-          </p>
-          <p className="text-gray-500 text-sm">
-            © 2025 MSU Enrollment AI. Powered by artificial intelligence.
-          </p>
+          {/* <p className="text-slate-600 text-sm">
+            © 2025 Mindanao State University. All rights reserved.
+          </p> */}
         </div>
       </footer>
     </main>
+  );
+}
+
+function FeatureCard({ icon, title, description, delay }: { icon: React.ReactNode, title: string, description: string, delay: number }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ delay, duration: 0.5 }}
+      className="p-8 rounded-3xl bg-white/5 border border-white/10 hover:border-blue-500/30 hover:bg-white/10 transition-all duration-300 group"
+    >
+      <div className="mb-6 p-4 rounded-2xl bg-slate-900/50 w-fit group-hover:scale-110 transition-transform duration-300 border border-white/5">
+        {icon}
+      </div>
+      <h3 className="text-xl font-bold mb-4 text-white group-hover:text-blue-400 transition-colors">{title}</h3>
+      <p className="text-slate-400 leading-relaxed">
+        {description}
+      </p>
+    </motion.div>
+  );
+}
+
+function StepCard({ number, icon, title, description }: { number: string, icon: React.ReactNode, title: string, description: string }) {
+  return (
+    <div className="relative flex flex-col items-center text-center group">
+      <div className="w-24 h-24 rounded-full bg-slate-900 border border-blue-500/30 flex items-center justify-center mb-6 relative z-10 group-hover:border-blue-500 transition-colors duration-300 shadow-lg shadow-blue-900/20">
+        <div className="text-blue-500 group-hover:scale-110 transition-transform duration-300">
+          {icon}
+        </div>
+        <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-xs font-bold text-white border-2 border-slate-900">
+          {number}
+        </div>
+      </div>
+      <h3 className="text-xl font-bold mb-3 text-white">{title}</h3>
+      <p className="text-slate-400 max-w-xs mx-auto">{description}</p>
+    </div>
+  );
+}
+
+function StatItem({ value, label }: { value: string, label: string }) {
+  return (
+    <div>
+      <div className="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-b from-white to-slate-500 mb-2">
+        {value}
+      </div>
+      <div className="text-blue-400 font-medium text-sm uppercase tracking-wider">{label}</div>
+    </div>
   );
 }

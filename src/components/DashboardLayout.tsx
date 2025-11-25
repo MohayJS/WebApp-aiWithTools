@@ -55,10 +55,10 @@ export default function DashboardLayout({ children, user }: DashboardLayoutProps
           <SidebarHeader className="p-6">
             <div className="flex items-center gap-3">
               <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-200">
-                <span className="text-white font-bold text-sm tracking-wider">OE</span>
+                <span className="text-white font-bold text-sm tracking-wider">EA</span>
               </div>
               <div>
-                <h2 className="text-lg font-bold text-gray-800 tracking-tight">Enrollment</h2>
+                <h2 className="text-lg font-bold text-gray-800 tracking-tight">Enrollment AI</h2>
                 <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Student Portal</p>
               </div>
             </div>
