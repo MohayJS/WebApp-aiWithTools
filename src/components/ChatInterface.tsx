@@ -5,12 +5,7 @@ import { User } from '@/lib/auth';
 import ReactMarkdown from 'react-markdown';
 import { Trash2, Send, Sparkles, Bot, User as UserIcon, ArrowUp } from 'lucide-react';
 
-interface Message {
-  id: string;
-  content: string;
-  role: 'user' | 'assistant';
-  timestamp: Date;
-}
+import { useChat } from '@/context/ChatContext';
 
 interface ChatInterfaceProps {
   user?: User | null;
@@ -24,10 +19,8 @@ const SUGGESTED_PROMPTS = [
 ];
 
 export default function ChatInterface({ user }: ChatInterfaceProps) {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const { messages, isLoading, sendMessage: sendContextMessage, clearChat } = useChat();
   const [input, setInput] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [sessionId] = useState(() => `session_${Date.now()}_${Math.random()}`);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -50,75 +43,8 @@ export default function ChatInterface({ user }: ChatInterfaceProps) {
     const contentToSend = customContent || input.trim();
     if (!contentToSend || isLoading) return;
 
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      content: contentToSend,
-      role: 'user',
-      timestamp: new Date(),
-    };
-
-    setMessages(prev => [...prev, userMessage]);
     if (!customContent) setInput('');
-    setIsLoading(true);
-
-    try {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          message: contentToSend,
-          sessionId,
-          messages: messages,
-          user: user,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to send message');
-      }
-
-      const data = await response.json();
-
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        content: data.response,
-        role: 'assistant',
-        timestamp: new Date(),
-      };
-
-      setMessages(prev => [...prev, assistantMessage]);
-    } catch (error) {
-      console.error('Error sending message:', error);
-      const errorMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        content: 'Sorry, there was an error processing your request. Please try again.',
-        role: 'assistant',
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, errorMessage]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const clearChat = async () => {
-    try {
-      await fetch('/api/chat', {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          sessionId,
-        }),
-      });
-    } catch (error) {
-      console.error('Error clearing chat:', error);
-    }
-
-    setMessages([]);
+    await sendContextMessage(contentToSend, user);
   };
 
   return (

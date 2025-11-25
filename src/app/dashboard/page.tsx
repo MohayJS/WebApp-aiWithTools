@@ -102,12 +102,14 @@ export default function Dashboard() {
 
   if (isLoading) {
     return (
-      <div className="min-h-[60vh] flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
-          <p className="text-indigo-600 font-medium animate-pulse">Loading your dashboard...</p>
+      <DashboardLayout user={user}>
+        <div className="min-h-[60vh] flex items-center justify-center">
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
+            <p className="text-indigo-600 font-medium animate-pulse">Loading your dashboard...</p>
+          </div>
         </div>
-      </div>
+      </DashboardLayout>
     );
   }
 
